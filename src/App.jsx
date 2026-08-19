@@ -572,51 +572,85 @@ const Footer = () => (
 );
 
 const LoadingScreen = ({ onComplete }) => {
+  const [showRocket, setShowRocket] = useState(true);
+
   React.useEffect(() => {
-    // Firework explosion at 2.5 seconds
+    // 1. Rocket hits the top and disappears at 1.2s
+    const rocketTimer = setTimeout(() => {
+      setShowRocket(false);
+    }, 1200);
+
+    // 2. The Massive Firework Burst at 1.3s (slight pause for anticipation)
     const fireworkTimer = setTimeout(() => {
-      const duration = 1500;
-      const end = Date.now() + duration;
+      const origin = { x: 0.5, y: 0.3 }; // Center-top of screen
+      const colors = ['#f43f5e', '#fbbf24', '#e879f9', '#ffffff', '#60a5fa'];
 
-      const frame = () => {
-        // Left side burst
+      // Layer 1: The dense, heavy, colorful center
+      confetti({
+        particleCount: 150,
+        spread: 360,
+        startVelocity: 40,
+        origin,
+        colors,
+        ticks: 120,
+        gravity: 0.8,
+        scalar: 1.2,
+        zIndex: 200,
+        shapes: ['circle']
+      });
+
+      // Layer 2: The fast, wide, bright outer ring
+      confetti({
+        particleCount: 100,
+        spread: 360,
+        startVelocity: 75,
+        origin,
+        colors: ['#ffffff', '#fde047'],
+        ticks: 150,
+        gravity: 1.1,
+        scalar: 0.8,
+        zIndex: 200,
+      });
+
+      // Layer 3: Secondary glowing crackles slightly delayed
+      setTimeout(() => {
         confetti({
-          particleCount: 20,
-          startVelocity: 45,
+          particleCount: 80,
           spread: 360,
-          origin: { x: Math.random() * 0.3 + 0.1, y: Math.random() * 0.4 + 0.1 },
-          colors: ['#f43f5e', '#fbbf24', '#ffffff'],
-          ticks: 100,
+          startVelocity: 55,
+          origin,
+          colors: ['#fbbf24', '#f59e0b', '#fb7185'],
+          ticks: 90,
           gravity: 0.6,
-          scalar: 0.8,
-          zIndex: 200
+          scalar: 0.6,
+          zIndex: 200,
         });
-        // Right side burst
+      }, 150);
+
+      // Layer 4: A few tiny stars floating down slowly
+      setTimeout(() => {
         confetti({
-          particleCount: 20,
-          startVelocity: 45,
+          particleCount: 30,
           spread: 360,
-          origin: { x: Math.random() * 0.3 + 0.6, y: Math.random() * 0.4 + 0.1 },
-          colors: ['#60a5fa', '#e879f9', '#ffffff'],
-          ticks: 100,
-          gravity: 0.6,
-          scalar: 0.8,
-          zIndex: 200
+          startVelocity: 20,
+          origin,
+          colors: ['#ffffff'],
+          ticks: 200,
+          gravity: 0.3,
+          scalar: 0.4,
+          zIndex: 200,
         });
+      }, 300);
 
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      };
-      frame();
-    }, 2500);
+    }, 1300);
 
-    // Fade out and unmount at 3.5 seconds
+    // 3. Fade out the dark sky overlay at 3.5s
     const completeTimer = setTimeout(() => {
       onComplete();
-    }, 3500);
+    }, 3800); // Extended slightly so the embers fall before fade
 
     return () => {
+      clearTimeout(rocketTimer);
       clearTimeout(fireworkTimer);
       clearTimeout(completeTimer);
     };
@@ -628,42 +662,35 @@ const LoadingScreen = ({ onComplete }) => {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }}
     >
-      {/* Starry background */}
-      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:40px_40px]"></div>
+      {/* Deep starry night background */}
+      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:40px_40px]"></div>
       
-      <div className="relative flex flex-col items-center z-10">
-        {/* The Sparkler / Fuse */}
-        <motion.div 
-          className="w-[2px] bg-gradient-to-b from-transparent via-rose-500 to-rose-600 rounded-full relative"
-          initial={{ height: 200 }}
-          animate={{ height: 0 }}
-          transition={{ duration: 2.5, ease: "linear" }}
-        >
-          {/* Spark at the top of the burning fuse */}
-          <motion.div 
-            className="absolute -top-6 -left-4 w-10 h-10 rounded-full bg-yellow-300 blur-md mix-blend-screen"
-            animate={{ 
-              scale: [1, 1.8, 1, 2.5, 1],
-              opacity: [0.8, 1, 0.4, 1, 0.8],
-              rotate: [0, 90, 180, 270, 360]
-            }}
-            transition={{ repeat: Infinity, duration: 0.15 }}
-          />
-          <motion.div 
-            className="absolute -top-2 -left-1 w-3 h-3 rounded-full bg-white shadow-[0_0_30px_15px_#fef08a]"
-            animate={{ scale: [1, 1.3, 1] }}
-            transition={{ repeat: Infinity, duration: 0.1 }}
-          />
-        </motion.div>
-
-        <motion.p 
-          className="text-rose-200 mt-12 font-sans tracking-[0.4em] uppercase text-xs md:text-sm font-semibold opacity-60"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          Lighting the spark...
-        </motion.p>
+      <div className="absolute inset-0 pointer-events-none">
+        <AnimatePresence>
+          {showRocket && (
+            <motion.div
+              className="absolute left-1/2 bottom-0 w-1.5 h-6 rounded-full bg-yellow-100 shadow-[0_0_20px_5px_#fde047] flex justify-center"
+              style={{ x: "-50%" }}
+              initial={{ y: "10vh", scale: 1 }}
+              animate={{ y: "-70vh", scale: 0.6 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 1.2, ease: "easeIn" }}
+            >
+              {/* Rocket fire trail */}
+              <motion.div 
+                className="absolute top-[80%] left-1/2 -translate-x-1/2 w-4 h-24 bg-gradient-to-b from-orange-400 via-red-500 to-transparent blur-sm rounded-full"
+                animate={{ opacity: [0.7, 1, 0.5] }}
+                transition={{ repeat: Infinity, duration: 0.05 }}
+              />
+              {/* Extra spark particles following the rocket */}
+              <motion.div 
+                className="absolute top-[90%] left-1/2 -translate-x-1/2 w-8 h-12 bg-yellow-300 blur-md mix-blend-screen rounded-full"
+                animate={{ opacity: [0, 0.8, 0], scale: [0.5, 1.5, 0.5] }}
+                transition={{ repeat: Infinity, duration: 0.1 }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
