@@ -478,8 +478,44 @@ const InteractiveSection = () => {
 const MusicPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = React.useRef(null);
+  const hasInteracted = React.useRef(false);
 
-  const togglePlay = () => {
+  React.useEffect(() => {
+    const audio = audioRef.current;
+    
+    // 1. Try to autoplay immediately (may be blocked by browser)
+    audio.play()
+      .then(() => setIsPlaying(true))
+      .catch((err) => console.log("Autoplay blocked. Waiting for interaction.", err));
+
+    // 2. Play on first click anywhere on the page
+    const handleFirstInteraction = () => {
+      if (!hasInteracted.current && audio.paused) {
+        audio.play()
+          .then(() => {
+            setIsPlaying(true);
+            hasInteracted.current = true;
+          })
+          .catch(e => console.log(e));
+      }
+      
+      // We only want this to trigger once
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+  }, []);
+
+  const togglePlay = (e) => {
+    e.stopPropagation(); // Don't trigger the document click
+    hasInteracted.current = true; // Mark as interacted manually
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -490,8 +526,7 @@ const MusicPlayer = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/* Audio element pointing to a placeholder file in public folder */}
-      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}music.mp3`} loop />
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}music.mp3`} loop autoPlay />
       
       <motion.button
         onClick={togglePlay}
@@ -506,7 +541,6 @@ const MusicPlayer = () => {
           <Disc size={28} />
         </motion.div>
         
-        {/* Tiny musical notes emitting when playing */}
         {isPlaying && (
           <motion.div 
             className="absolute -top-2 -left-2 text-rose-400"
