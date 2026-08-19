@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { Heart, Sparkles, X, Gift, Star, Flower2, Quote, Disc } from 'lucide-react';
 
@@ -99,16 +99,72 @@ const FloatingIcons = () => (
   </>
 );
 
+const SparkleTrail = () => {
+  const [trail, setTrail] = useState([]);
+
+  React.useEffect(() => {
+    let timeout;
+    const handleMove = (e) => {
+      const x = e.clientX || (e.touches && e.touches[0].clientX);
+      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      if (x === undefined || y === undefined) return;
+      
+      const newSparkle = { id: Date.now() + Math.random(), x, y };
+      setTrail((prev) => [...prev, newSparkle]);
+      
+      setTimeout(() => {
+        setTrail((prev) => prev.filter(p => p.id !== newSparkle.id));
+      }, 1000);
+    };
+
+    const throttledMove = (e) => {
+      if(timeout) return;
+      timeout = setTimeout(() => {
+        handleMove(e);
+        timeout = null;
+      }, 50);
+    };
+
+    window.addEventListener('pointermove', throttledMove);
+    return () => window.removeEventListener('pointermove', throttledMove);
+  }, []);
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[150] overflow-hidden">
+      <AnimatePresence>
+        {trail.map((sparkle) => (
+          <motion.div
+            key={sparkle.id}
+            initial={{ opacity: 1, scale: 0, rotate: 0 }}
+            animate={{ opacity: 0, scale: 1.5, rotate: 180 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="absolute w-4 h-4 text-rose-300 drop-shadow-sm"
+            style={{ left: sparkle.x - 8, top: sparkle.y - 8 }}
+          >
+            <Star size={12} fill="currentColor" />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const Hero = () => {
+  const { scrollYProgress } = useScroll();
+  const yBg = useTransform(scrollYProgress, [0, 1], [0, 600]);
+  const yText = useTransform(scrollYProgress, [0, 1], [0, 200]);
+
   return (
     <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-rose-100 via-pink-50 to-white">
       <FloatingIcons />
       
       {/* Decorative Orbs */}
-      <div className="absolute top-20 left-10 w-96 h-96 bg-rose-200/50 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-200/50 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
+      <motion.div style={{ y: yBg }} className="absolute top-20 left-10 w-96 h-96 bg-rose-200/50 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow" />
+      <motion.div style={{ y: yBg }} className="absolute bottom-20 right-10 w-96 h-96 bg-fuchsia-200/50 rounded-full mix-blend-multiply filter blur-3xl animate-pulse-slow" />
 
       <motion.div 
+        style={{ y: yText }}
         className="z-10 text-center px-8 md:px-16 backdrop-blur-xl bg-white/40 py-16 rounded-[3rem] shadow-[0_20px_50px_rgba(251,113,133,0.15)] border border-white/80 mx-4 max-w-4xl relative mt-10"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -156,7 +212,6 @@ const Hero = () => {
         </motion.div>
       </motion.div>
       
-      {/* Soft gradient transition to next section */}
       <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-rose-50 to-transparent" />
     </section>
   );
@@ -165,15 +220,16 @@ const Hero = () => {
 const Gallery = () => {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Random rotations for a scrapbook/polaroid effect
-  const rotations = [-4, 3, -6, 5, -2, 4, -5, 2];
+  // Parallax for the timeline background
+  const { scrollYProgress } = useScroll();
+  const yBg = useTransform(scrollYProgress, [0, 1], [0, 300]);
 
   return (
-    <section className="pt-20 pb-32 px-4 md:px-12 bg-rose-50 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(#e11d48_1.5px,transparent_1.5px)] [background-size:24px_24px]"></div>
+    <section className="pt-32 pb-48 px-4 md:px-12 bg-rose-50 relative overflow-hidden">
+      <motion.div style={{ y: yBg }} className="absolute inset-0 opacity-[0.05] bg-[radial-gradient(#e11d48_2px,transparent_2px)] [background-size:32px_32px]" />
       
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16">
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="text-center mb-32">
           <motion.div 
             initial={{ scale: 0 }} 
             whileInView={{ scale: 1 }} 
@@ -182,44 +238,53 @@ const Gallery = () => {
           >
             <Heart className="text-rose-400" size={48} fill="currentColor" />
           </motion.div>
-          <h2 className="text-6xl md:text-7xl font-cursive font-bold text-rose-800 drop-shadow-sm">
-            Beautiful Memories ✨
+          <h2 className="text-6xl md:text-8xl font-cursive font-bold text-rose-800 drop-shadow-sm">
+            Our Journey ✨
           </h2>
         </div>
 
-        {/* Scrapbook Layout */}
-        <div className="flex flex-wrap justify-center gap-8 md:gap-14 pb-8 items-center">
+        <div className="relative flex flex-col gap-24 md:gap-32">
+          {/* Central Dashed Timeline Line */}
+          <div className="absolute left-[20px] md:left-1/2 top-0 bottom-0 w-[3px] bg-rose-300 md:-translate-x-1/2 opacity-30 shadow-[0_0_10px_rgba(251,113,133,0.5)] border-l-[3px] border-dashed border-rose-400/80 rounded-full"></div>
+
           {PHOTOS.map((photo, index) => {
-            const rot = rotations[index % rotations.length];
+            const isLeft = index % 2 === 0;
             return (
               <motion.div
                 key={index}
-                className={`relative ${photo.widthClass} flex-shrink-0 cursor-pointer group`}
-                initial={{ opacity: 0, y: 80, rotate: rot - 15 }}
-                whileInView={{ opacity: 1, y: 0, rotate: rot }}
-                whileHover={{ scale: 1.05, rotate: 0, zIndex: 30 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ type: "spring", stiffness: 150, damping: 15 }}
-                onClick={() => setSelectedPhoto(photo.url)}
-                style={{ zIndex: index }}
+                className={`relative flex items-center w-full ${isLeft ? 'justify-end md:justify-start' : 'justify-end md:justify-end'} pl-16 md:pl-0`}
+                initial={{ opacity: 0, x: isLeft ? -100 : 100, rotate: isLeft ? -5 : 5 }}
+                whileInView={{ opacity: 1, x: 0, rotate: isLeft ? -3 : 3 }}
+                viewport={{ once: true, margin: "-150px" }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
               >
-                {/* Washi Tape Effect */}
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-8 bg-white/40 backdrop-blur-md rotate-[-2deg] z-20 border border-white/50 shadow-sm opacity-80 mix-blend-overlay"></div>
+                {/* Timeline Connector Dot */}
+                <div className={`absolute left-[-4px] md:left-1/2 top-1/2 -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-white border-4 md:border-[6px] border-rose-400 rounded-full z-20 shadow-lg ${!isLeft ? 'md:-translate-x-1/2' : 'md:-translate-x-1/2'}`}></div>
                 
-                <div className="bg-white p-3 pb-12 md:p-5 md:pb-16 rounded-sm shadow-xl border border-gray-100 transform transition-all group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] relative">
-                  <div className="w-full overflow-hidden rounded-sm" style={{ aspectRatio: photo.aspect }}>
-                    <img 
-                      src={photo.url} 
-                      alt={`Memory ${index + 1}`} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                  <div className="absolute bottom-4 left-0 w-full text-center flex justify-center items-center gap-2 opacity-40">
-                    <Star size={12} fill="#f43f5e" className="text-rose-500" />
-                    <Heart className="text-rose-500" size={16} fill="currentColor"/>
-                    <Star size={12} fill="#f43f5e" className="text-rose-500" />
+                {/* Photo Card */}
+                <div 
+                  className={`w-full md:w-[45%] max-w-[450px] cursor-pointer group z-30 ${isLeft ? 'md:pr-12' : 'md:pl-12'}`}
+                  onClick={() => setSelectedPhoto(photo.url)}
+                >
+                  <div className="bg-white p-4 pb-16 md:p-6 md:pb-20 rounded-xl shadow-2xl border border-rose-100 transform transition-all group-hover:scale-105 group-hover:-translate-y-2 group-hover:rotate-0 group-hover:shadow-[0_30px_60px_rgba(225,29,72,0.15)] relative">
+                    
+                    {/* Washi Tape Effect */}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 md:w-32 h-10 bg-white/50 backdrop-blur-md rotate-[-3deg] z-40 border border-white/60 shadow-sm opacity-80 mix-blend-overlay"></div>
+                    
+                    <div className="w-full overflow-hidden rounded-md" style={{ aspectRatio: photo.aspect }}>
+                      <img 
+                        src={photo.url} 
+                        alt={`Memory ${index + 1}`} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div className="absolute bottom-6 left-0 w-full text-center flex justify-center items-center gap-3 opacity-60">
+                      <Star size={16} fill="#f43f5e" className="text-rose-500" />
+                      <Heart className="text-rose-500" size={24} fill="currentColor"/>
+                      <Star size={16} fill="#f43f5e" className="text-rose-500" />
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -232,7 +297,7 @@ const Gallery = () => {
       <AnimatePresence>
         {selectedPhoto && (
           <motion.div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-rose-950/90 p-4 backdrop-blur-lg"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-rose-950/90 p-4 backdrop-blur-lg"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -701,6 +766,7 @@ function App() {
 
   return (
     <main className="overflow-x-hidden selection:bg-rose-200 selection:text-rose-900 bg-white min-h-screen">
+      <SparkleTrail />
       <AnimatePresence>
         {loading && <LoadingScreen key="loading" onComplete={() => setLoading(false)} />}
       </AnimatePresence>
