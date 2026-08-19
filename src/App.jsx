@@ -48,6 +48,16 @@ const PHOTOS = [
     url: `${import.meta.env.BASE_URL}photo8.png`, 
     aspect: "9/16",
     widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
+  },
+  { 
+    url: `${import.meta.env.BASE_URL}photo9.jpg`, 
+    aspect: "9/16",
+    widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
+  },
+  { 
+    url: `${import.meta.env.BASE_URL}photo10.png`, 
+    aspect: "9/16",
+    widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
   }
 ];
 
