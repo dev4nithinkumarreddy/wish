@@ -10,42 +10,42 @@ const SISTER_NAME = "Pallavi";
 
 const PHOTOS = [
   { 
-    url: "/photo1.png", 
+    url: `${import.meta.env.BASE_URL}photo1.png`, 
     aspect: "9/16",
     widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
   },
   { 
-    url: "/photo2.png", 
+    url: `${import.meta.env.BASE_URL}photo2.png`, 
     aspect: "16/9",
     widthClass: "w-[85vw] sm:w-[70vw] md:w-[50vw] lg:w-[500px]"
   },
   { 
-    url: "/photo3.jpg", 
+    url: `${import.meta.env.BASE_URL}photo3.jpg`, 
     aspect: "3/4",
     widthClass: "w-[70vw] sm:w-[45vw] md:w-[28vw] lg:w-[300px]"
   },
   { 
-    url: "/photo4.jpg", 
+    url: `${import.meta.env.BASE_URL}photo4.jpg`, 
     aspect: "3/4",
     widthClass: "w-[70vw] sm:w-[45vw] md:w-[28vw] lg:w-[300px]"
   },
   { 
-    url: "/photo5.jpg", 
+    url: `${import.meta.env.BASE_URL}photo5.jpg`, 
     aspect: "3/4",
     widthClass: "w-[70vw] sm:w-[45vw] md:w-[28vw] lg:w-[300px]"
   },
   { 
-    url: "/photo6.png", 
+    url: `${import.meta.env.BASE_URL}photo6.png`, 
     aspect: "9/16",
     widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
   },
   { 
-    url: "/photo7.png", 
+    url: `${import.meta.env.BASE_URL}photo7.png`, 
     aspect: "9/16",
     widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
   },
   { 
-    url: "/photo8.png", 
+    url: `${import.meta.env.BASE_URL}photo8.png`, 
     aspect: "9/16",
     widthClass: "w-[65vw] sm:w-[45vw] md:w-[28vw] lg:w-[280px]"
   }
