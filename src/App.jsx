@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Heart, Sparkles, X, Gift, Star, Flower2 } from 'lucide-react';
+import { Heart, Sparkles, X, Gift, Star, Flower2, Quote } from 'lucide-react';
 
 // ==========================================
 // CONFIGURATION & CONTENT - EDIT THIS!
