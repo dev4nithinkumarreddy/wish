@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { Heart, Sparkles, X, Gift, Star, Flower2, Quote } from 'lucide-react';
+import { Heart, Sparkles, X, Gift, Star, Flower2, Quote, Disc } from 'lucide-react';
 
 // ==========================================
 // CONFIGURATION & CONTENT - EDIT THIS!
@@ -323,82 +323,201 @@ const MessageSection = () => {
   );
 };
 
+const ReasonsSection = () => {
+  const reasons = [
+    {
+      title: "Your Heart of Gold 💛",
+      text: "You always put others first and care so deeply about the people you love. Your kindness is your superpower."
+    },
+    {
+      title: "Our Inside Jokes 🤭",
+      text: "No one else understands my humor quite like you do. We can communicate just by making eye contact across a room!"
+    },
+    {
+      title: "Your Unending Support 🌟",
+      text: "Through every up and down, you've been my rock. I know you'll always have my back, no matter what."
+    }
+  ];
+
+  return (
+    <section className="py-24 px-6 md:px-12 bg-white relative overflow-hidden">
+      <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-cursive font-bold text-rose-800 drop-shadow-sm mb-4">
+            Why You're The Best
+          </h2>
+          <p className="text-gray-500 font-sans tracking-widest text-sm uppercase">Just a few of a million reasons</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {reasons.map((reason, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: index * 0.2, duration: 0.8, type: "spring" }}
+              className="bg-rose-50/50 backdrop-blur-sm p-8 rounded-3xl border border-rose-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(251,113,133,0.15)] transition-all group"
+            >
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 text-rose-400 group-hover:scale-110 group-hover:text-rose-500 transition-transform">
+                <Star size={24} fill="currentColor" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4 font-sans">{reason.title}</h3>
+              <p className="text-gray-600 leading-relaxed font-sans">{reason.text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const InteractiveSection = () => {
-  const [revealed, setRevealed] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const triggerConfetti = () => {
-    setRevealed(true);
+  const openEnvelope = () => {
+    if (isOpen) return;
+    setIsOpen(true);
     
-    const duration = 5 * 1000;
-    const end = Date.now() + duration;
+    setTimeout(() => {
+      const duration = 5 * 1000;
+      const end = Date.now() + duration;
 
-    const frame = () => {
-      confetti({
-        particleCount: 10,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#fb7185', '#f472b6', '#e879f9', '#fef08a', '#fda4af']
-      });
-      confetti({
-        particleCount: 10,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#fb7185', '#f472b6', '#e879f9', '#fef08a', '#fda4af']
-      });
+      const frame = () => {
+        confetti({
+          particleCount: 15,
+          angle: 60,
+          spread: 70,
+          origin: { x: 0 },
+          colors: ['#fb7185', '#f472b6', '#e879f9', '#fef08a', '#fda4af']
+        });
+        confetti({
+          particleCount: 15,
+          angle: 120,
+          spread: 70,
+          origin: { x: 1 },
+          colors: ['#fb7185', '#f472b6', '#e879f9', '#fef08a', '#fda4af']
+        });
 
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      };
+      frame();
+    }, 800);
   };
 
   return (
-    <section className="py-32 md:py-48 text-center px-4 bg-gradient-to-t from-rose-100 to-white relative overflow-hidden">
-      {!revealed ? (
-        <motion.button
-          onClick={triggerConfetti}
-          className="group relative inline-flex items-center justify-center px-14 py-8 font-bold text-white bg-rose-500 rounded-full overflow-hidden shadow-[0_15px_40px_rgba(244,63,94,0.4)] hover:shadow-[0_20px_50px_rgba(244,63,94,0.6)] transition-all"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+    <section className="py-32 md:py-48 text-center px-4 bg-gradient-to-t from-rose-100 to-white relative overflow-hidden flex flex-col items-center justify-center min-h-[80vh]">
+      <div className="text-center mb-20">
+        <h2 className="text-3xl md:text-5xl font-cursive font-bold text-rose-800 mb-4">
+          A Special Delivery...
+        </h2>
+        <p className="text-gray-500 font-sans tracking-widest text-sm uppercase">Tap the envelope to open</p>
+      </div>
+
+      {/* The Envelope Wrapper */}
+      <div className="relative w-full max-w-[320px] md:max-w-[500px] aspect-[4/3] cursor-pointer group perspective-1000" onClick={openEnvelope}>
+        
+        {/* Envelope Back */}
+        <div className="absolute inset-0 bg-rose-300 rounded-xl shadow-2xl"></div>
+
+        {/* The Letter inside */}
+        <motion.div 
+          className="absolute bottom-2 left-2 right-2 bg-white rounded-lg p-6 shadow-md flex items-center justify-center border border-gray-100"
+          initial={{ y: 0, height: "90%", zIndex: 10 }}
+          animate={isOpen ? { 
+            y: -150, 
+            height: "140%", 
+            zIndex: 40,
+            scale: 1.1,
+            rotate: -2
+          } : {}}
+          transition={{ duration: 1, delay: 0.2, type: "spring", bounce: 0.3 }}
         >
-          <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
-          <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-rose-400 to-fuchsia-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-          <span className="relative flex items-center gap-4 text-3xl font-sans tracking-wide">
-            <Gift className="animate-bounce" size={36} />
-            Unwrap Your Surprise!
-          </span>
-        </motion.button>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5, y: 50 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: "spring", bounce: 0.6, duration: 1 }}
-          className="inline-block bg-white/90 backdrop-blur-md p-14 rounded-[3rem] shadow-2xl border-4 border-rose-200 max-w-3xl mx-auto relative"
-        >
-          <motion.div 
-            className="absolute -top-12 -right-12 text-yellow-400 drop-shadow-lg"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-          >
-            <Sparkles size={100} fill="currentColor" />
-          </motion.div>
-          <motion.div 
-            className="absolute -bottom-10 -left-10 text-rose-400 drop-shadow-lg"
-            animate={{ rotate: -360 }}
-            transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
-          >
-            <Flower2 size={80} fill="currentColor" />
-          </motion.div>
-          
-          <p className="text-4xl md:text-6xl font-cursive text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-fuchsia-500 to-pink-500 animate-gradient-x leading-tight font-bold">
-            {SURPRISE_MESSAGE}
-          </p>
+          <div className="text-center w-full h-full flex flex-col items-center justify-center">
+            {isOpen && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}>
+                <Flower2 className="text-rose-400 mx-auto mb-2" size={32} fill="#fda4af" />
+                <p className="text-xl md:text-3xl font-cursive text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-fuchsia-600 font-bold leading-tight">
+                  {SURPRISE_MESSAGE}
+                </p>
+              </motion.div>
+            )}
+          </div>
         </motion.div>
-      )}
+
+        {/* Envelope Front Pocket (Left & Right Flaps combined using clip-path) */}
+        <div className="absolute inset-0 bg-rose-200 rounded-xl z-20 shadow-inner" style={{ clipPath: 'polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)' }}></div>
+
+        {/* Envelope Top Flap */}
+        <motion.div 
+          className="absolute top-0 left-0 w-full h-[65%] bg-rose-400 rounded-t-xl z-30 origin-top shadow-[0_5px_15px_rgba(0,0,0,0.1)]"
+          style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)' }}
+          initial={{ rotateX: 0 }}
+          animate={isOpen ? { rotateX: -180, zIndex: 5 } : { rotateX: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+        >
+          {/* Wax Seal */}
+          <motion.div 
+            className="absolute left-1/2 bottom-[10%] -translate-x-1/2 translate-y-1/2 w-12 h-12 bg-red-600 rounded-full shadow-lg flex items-center justify-center border-2 border-red-700"
+            animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Heart size={20} fill="#fca5a5" className="text-red-300" />
+          </motion.div>
+        </motion.div>
+
+      </div>
     </section>
+  );
+};
+
+const MusicPlayer = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = React.useRef(null);
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      {/* Audio element pointing to a placeholder file in public folder */}
+      <audio ref={audioRef} src={`${import.meta.env.BASE_URL}music.mp3`} loop />
+      
+      <motion.button
+        onClick={togglePlay}
+        className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl backdrop-blur-md transition-all ${isPlaying ? 'bg-rose-500 text-white' : 'bg-white/80 text-rose-500 border border-rose-200'}`}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <motion.div
+          animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
+          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+        >
+          <Disc size={28} />
+        </motion.div>
+        
+        {/* Tiny musical notes emitting when playing */}
+        {isPlaying && (
+          <motion.div 
+            className="absolute -top-2 -left-2 text-rose-400"
+            animate={{ y: [-10, -30], opacity: [1, 0], x: [-5, -15] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            ♪
+          </motion.div>
+        )}
+      </motion.button>
+    </div>
   );
 };
 
@@ -424,8 +543,10 @@ function App() {
       <Hero />
       <Gallery />
       <MessageSection />
+      <ReasonsSection />
       <InteractiveSection />
       <Footer />
+      <MusicPlayer />
     </main>
   );
 }
